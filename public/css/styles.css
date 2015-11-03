@@ -1,0 +1,98 @@
+body{
+  background: #3b9d99;
+  color: #3b9d99;
+}
+#map {
+  background: #faebd7;
+  max-width:360px;
+  margin: 10px auto;
+  padding:5px 20px 20px 20px;
+  border-radius: 5px;
+  position:relative;
+  height:300px;
+}
+
+#map h3 {
+  text-align: center;
+}
+#map #location {
+  float:right;
+  color: red
+}
+
+#map .separator{
+  clear:both;
+  margin-bottom:5px;
+  padding: 10px 0;
+  /*border-bottom: 1px solid grey;*/
+}
+
+#map img {
+  float:left;
+  padding: 0 10px 0px 0;
+  background: #faebd7;
+}
+
+#map .temp {
+  color: #666;
+  font-size:25px;
+  padding-right:5px;
+
+}
+
+#map .inline-separator {
+  /*border-right: 1px solid grey*/
+}
+#map .map {
+  float:left;
+  width:50%;
+}
+.clear {
+  clear:both;
+}
+
+#map .temperature {
+  float:right;
+  width:50%;
+  text-align: right;
+}
+
+#map .temperature img {
+  float:right;
+}
+
+table {
+  width: 100%;
+  border: 1px solid grey;
+}
+
+table tr {
+  border-bottom: 1px solid grey;
+}
+
+table tr td {
+  border-left: 1px solid grey;
+  padding:3px;
+}
+
+table tr:nth-child(odd) {
+  background: #ccc
+}
+#preloader {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  background: #faebd7     url('http://jimpunk.net/Loading/wp-content/uploads/loading45.gif') no-repeat center center;
+  border-radius: 5px;
+}
+
+.show{
+  display:block;
+}
+.hide {
+  display:none;
+}
