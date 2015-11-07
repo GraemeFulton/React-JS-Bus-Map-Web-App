@@ -45,6 +45,7 @@ export default class Map extends React.Component {
       }
       else {
         console.error(`error fetching directions ${ result }`);
+        alert('There are no buses running on this route.')
       }
     });
   }
@@ -53,8 +54,7 @@ export default class Map extends React.Component {
 
     this.state.begin = ReactDOM.findDOMNode(this.refs.begin).value
     this.state.end = ReactDOM.findDOMNode(this.refs.end).value
-  //  this.calcRoute(e);
-    console.log('begin: '+ this.state.begin+ '| end: '+this.state.end)
+
     this.setDirections()
 
 
@@ -65,21 +65,16 @@ export default class Map extends React.Component {
     console.log(e.target.value)
   }
 
-  /*
-   * 1. Create a component that wraps all your map sub-components.
-   */
   render () {
-    //const {origin, directions} = this.state;
-    /*
-     * 2. Render GoogleMap component with containerProps
-     */
+
     return (
 
       <div>
-        <h4>The input form is here:</h4>
-        Title:
+        <h4>Choose your location:</h4>
+        From:
         <input type="text" ref="begin" value={this.inputContent}
           onChange={this.changeContent} />
+        To:
         <input type="text" ref="end" value={this.inputContent}
             onChange={this.changeContent} />
         <button onClick={this.sendContent}>Submit</button>
@@ -90,9 +85,6 @@ export default class Map extends React.Component {
                   height: "100%",
                 },
               }}
-              /*
-               * 3. config <GoogleMap> instance by properties
-               */
               defaultZoom={8}
               defaultCenter={this.state.origin}>
 
