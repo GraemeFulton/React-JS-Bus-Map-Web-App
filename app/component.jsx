@@ -11,13 +11,14 @@ export default class Map extends React.Component {
     this.changeContent = this.changeContent.bind(this);
     this.sendContent = this.sendContent.bind(this);
     this.setDirections = this.setDirections.bind(this);
+    this.setCoordinates = this.setCoordinates.bind(this);
 
     this.state = {
-      origin: new google.maps.LatLng(41.8507300, -87.6512600),
-      destination: new google.maps.LatLng(41.8525800, -87.6514100),
+      // origin: new google.maps.LatLng(41.8507300, -87.6512600),
+      // destination: new google.maps.LatLng(41.8525800, -87.6514100),
       directions: null,
-      begin:"preston",
-      end:"blackpool",
+      begin:new google.maps.LatLng(51.52783450, -0.04076115),
+      end:new google.maps.LatLng(51.51560467, -0.10225884),
       directionService: new google.maps.DirectionsService()
 
     };
@@ -38,7 +39,7 @@ export default class Map extends React.Component {
       },
     }, (result, status) => {
       if(status == google.maps.DirectionsStatus.OK) {
-        console.log(result)
+        // console.log(result)
         this.setState({
           directions: result
         })
@@ -55,9 +56,26 @@ export default class Map extends React.Component {
     this.state.begin = ReactDOM.findDOMNode(this.refs.begin).value
     this.state.end = ReactDOM.findDOMNode(this.refs.end).value
 
+    this.setCoordinates();
+
     this.setDirections()
 
+  }
 
+  setCoordinates(){
+    var geocoder = new google.maps.Geocoder();
+
+    geocoder.geocode( { 'address': this.state.begin}, function(results, status) {
+
+      if (status == google.maps.GeocoderStatus.OK)
+      {
+          //set lat and long
+          this.state.beginLatitude = results[0].geometry.location.A
+          this.state.beginLongitude = results[0].geometry.location.F
+
+          console.log(this.state.beginLatitude)
+      }
+    }.bind(this));
   }
 
   changeContent(e) {
