@@ -1,9 +1,11 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
-import SimpleMap from './component.jsx';
+import Map from './component.jsx';
 
 main();
 
 function main() {
-    React.render(<SimpleMap />, document.getElementById('map'));
+    ReactDOM.render(<Map />, document.getElementById('app'));
+
 }
