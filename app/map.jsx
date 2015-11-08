@@ -108,7 +108,9 @@ export default class Map extends React.Component {
                 position: location,
                 title:json.markers[i].name,
                 label:json.markers[i].name,
-                data:json.markers[i]
+                data:json.markers[i],
+                icon:'./img/bus.png',
+                selected:false
               });
               this.state.markers.push(marker);
 
@@ -130,13 +132,49 @@ export default class Map extends React.Component {
     console.log(e.target.value)
   }
 
-  _handle_marker_click (marker) {
-    var name = marker.data.name.toString()
+  _handle_marker_click (marker, index) {
+    //clear all highlighted markers
+    for (var i = 0; i < this.state.markers.length; i++) {
+      this.state.markers[i].icon='./img/bus.png'
+      this.state.markers[i].selected=false
+    }
+    //highlight selected marker
+    if(marker.selected==false){
+      marker.selected = true
+    }
+    else{
+      marker.selected=false
+    }
+    marker.icon='./img/bus3.png'
+    this.state.markers[index] = marker
     this.setState({
-      station: marker.data.name
+      station: marker.data.name,
+      markers:this.state.markers
     });
 
+
   }
+  _onMarkerMouseOver(marker, index) {
+
+    if(marker.selected==false){
+  marker.icon='./img/bus2.png'
+  this.state.markers[index] = marker
+  this.setState({
+    markers:this.state.markers
+  });
+}
+
+}
+_onMarkerMouseOut(marker, index) {
+  if(marker.selected==false){
+  marker.icon='./img/bus.png'
+  this.state.markers[index] = marker
+  this.setState({
+    markers:this.state.markers
+  });
+}
+}
+
 
   render () {
 
@@ -160,13 +198,22 @@ export default class Map extends React.Component {
               }}
               defaultZoom={15}
               defaultCenter={this.state.origin}
-              center={this.state.origin}>
+              center={this.state.origin}
+              >
 
               {/*this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null*/}
 
 
               {this.state.markers.map((marker, index) => (
-               <Marker title={marker.title} onClick={this._handle_marker_click.bind(this, marker)} label={marker.label} position={marker.position} key={index} />
+               <Marker
+                 icon={marker.icon}
+                 title={marker.title}
+                 onClick={this._handle_marker_click.bind(this, marker, index)}
+                 position={marker.position}
+                 key={index}
+                 onMouseover={this._onMarkerMouseOver.bind(this, marker, index)}
+                 onMouseout={this._onMarkerMouseOut.bind(this, marker, index)}
+                 />
              ))}
 
             </GoogleMap>
