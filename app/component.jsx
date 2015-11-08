@@ -12,6 +12,7 @@ export default class Map extends React.Component {
     this.sendContent = this.sendContent.bind(this);
     this.setDirections = this.setDirections.bind(this);
     this.setCoordinates = this.setCoordinates.bind(this);
+    this.getNearestBusStops = this.getNearestBusStops.bind(this);
 
     this.state = {
       // origin: new google.maps.LatLng(41.8507300, -87.6512600),
@@ -19,7 +20,8 @@ export default class Map extends React.Component {
       directions: null,
       begin:new google.maps.LatLng(51.52783450, -0.04076115),
       end:new google.maps.LatLng(51.51560467, -0.10225884),
-      directionService: new google.maps.DirectionsService()
+      directionService: new google.maps.DirectionsService(),
+      markers: []
 
     };
   }
@@ -70,12 +72,50 @@ export default class Map extends React.Component {
       if (status == google.maps.GeocoderStatus.OK)
       {
           //set lat and long
-          this.state.beginLatitude = results[0].geometry.location.A
-          this.state.beginLongitude = results[0].geometry.location.F
+          // this.state.beginLatitude = results[0].geometry.location.A
+          // this.state.beginLongitude = results[0].geometry.location.F
 
-          console.log(this.state.beginLatitude)
+          this.state.northEastLat = results[0].geometry.location.A+0.01
+          this.state.northEastLong = results[0].geometry.location.F+0.01
+
+          this.state.southWestLat = results[0].geometry.location.A-0.01
+          this.state.southWestLong = results[0].geometry.location.F-0.01
+
+          console.log('south west: '+  this.state.southWestLat+': '+   this.state.southWestLong)
+          console.log('north east: '+  this.state.northEastLat+': '+   this.state.northEastLong)
+          this.getNearestBusStops();
+
+
+
       }
     }.bind(this));
+  }
+
+  getNearestBusStops(){
+
+    var url='http://digitaslbi-id-test.herokuapp.com/bus-stops?northEast='+ this.state.northEastLat +','+this.state.northEastLong+'&southWest='+this.state.southWestLat+','+this.state.southWestLong+''
+
+    $.ajax({
+       type: 'GET',
+        url: url,
+        async: false,
+        jsonpCallback: 'jsonCallback',
+        contentType: "application/json",
+        dataType: 'jsonp',
+        success: function(json) {
+           console.dir(json);
+        }.bind(this),
+        error: function(e) {
+           console.log(e.message);
+        }.bind(this)
+    });
+
+    var myLatLng = {lat:this.state.northEastLat, lng: this.state.northEastLong};
+    //plot stops on map
+    this.state.markers.push({
+        position: myLatLng
+      });
+      console.log(this.state.markers)
   }
 
   changeContent(e) {
@@ -107,6 +147,10 @@ export default class Map extends React.Component {
               defaultCenter={this.state.origin}>
 
               {this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null}
+
+              {this.state.markers.map((marker, index) => (
+               <Marker position={marker.position} key={index} />
+             ))}
 
             </GoogleMap>
           </div>
