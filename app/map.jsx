@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { GoogleMap, Marker, SearchBox, DirectionsRenderer } from "react-google-maps";
+import { GoogleMap, Marker, SearchBox, DirectionsRenderer, Label } from "react-google-maps";
+
+import DepartureBoard from './departureBoard.jsx';
 
 export default class Map extends React.Component {
 
@@ -13,15 +15,17 @@ export default class Map extends React.Component {
     this.setDirections = this.setDirections.bind(this);
     this.setCoordinates = this.setCoordinates.bind(this);
     this.getNearestBusStops = this.getNearestBusStops.bind(this);
+    this._handle_marker_click = this._handle_marker_click.bind(this);
 
     this.state = {
-      // origin: new google.maps.LatLng(41.8507300, -87.6512600),
+      origin: new google.maps.LatLng(51.5072, 0.1275),
       // destination: new google.maps.LatLng(41.8525800, -87.6514100),
       directions: null,
       begin:new google.maps.LatLng(51.52783450, -0.04076115),
       end:new google.maps.LatLng(51.51560467, -0.10225884),
       directionService: new google.maps.DirectionsService(),
-      markers: []
+      markers: [],
+      station:'no bus stop selected'
 
     };
   }
@@ -54,12 +58,11 @@ export default class Map extends React.Component {
   }
 
   sendContent(e) {
-
+    //$('.search_button').click();
     this.state.begin = ReactDOM.findDOMNode(this.refs.begin).value
     this.state.end = ReactDOM.findDOMNode(this.refs.end).value
 
     this.setCoordinates();
-
     this.setDirections()
 
   }
@@ -71,19 +74,18 @@ export default class Map extends React.Component {
 
       if (status == google.maps.GeocoderStatus.OK)
       {
-          //set lat and long
-          // this.state.beginLatitude = results[0].geometry.location.A
-          // this.state.beginLongitude = results[0].geometry.location.F
-
           this.state.northEastLat = results[0].geometry.location.A+0.01
           this.state.northEastLong = results[0].geometry.location.F+0.01
 
           this.state.southWestLat = results[0].geometry.location.A-0.01
           this.state.southWestLong = results[0].geometry.location.F-0.01
 
+          this.state.origin = new google.maps.LatLng(results[0].geometry.location.A, results[0].geometry.location.F),
+
+
+          this.getNearestBusStops();
           console.log('south west: '+  this.state.southWestLat+': '+   this.state.southWestLong)
           console.log('north east: '+  this.state.northEastLat+': '+   this.state.northEastLong)
-          this.getNearestBusStops();
 
 
 
@@ -99,28 +101,45 @@ export default class Map extends React.Component {
        type: 'GET',
         url: url,
         async: false,
-        jsonpCallback: 'jsonCallback',
+        // jsonpCallback: 'jsonCallback',
         contentType: "application/json",
         dataType: 'jsonp',
         success: function(json) {
-           console.dir(json);
+          //plot stops on map
+          for (var i = 0; i < json.markers.length; i++) {
+            var location = {lat:json.markers[i].lat, lng: json.markers[i].lng};
+
+            console.log(json.markers)
+            var marker = new google.maps.Marker({
+                position: location,
+                title:json.markers[i].name,
+                label:json.markers[i].name,
+                data:json.markers[i]
+              });
+
+            this.state.markers.push(marker);
+          }
+
         }.bind(this),
         error: function(e) {
            console.log(e.message);
         }.bind(this)
     });
 
-    var myLatLng = {lat:this.state.northEastLat, lng: this.state.northEastLong};
-    //plot stops on map
-    this.state.markers.push({
-        position: myLatLng
-      });
-      console.log(this.state.markers)
   }
 
   changeContent(e) {
    this.state.begin=e.target.value
     console.log(e.target.value)
+  }
+
+  _handle_marker_click (marker) {
+    console.log()
+    var name = marker.data.name.toString()
+    this.setState({
+      station: marker.data.name
+    });
+
   }
 
   render () {
@@ -135,7 +154,7 @@ export default class Map extends React.Component {
         To:
         <input type="text" ref="end" value={this.inputContent}
             onChange={this.changeContent} />
-        <button onClick={this.sendContent}>Submit</button>
+          <button className='search_button' onClick={this.sendContent}>Submit</button>
 
           <div className="map">
             <GoogleMap containerProps={{
@@ -143,16 +162,21 @@ export default class Map extends React.Component {
                   height: "100%",
                 },
               }}
-              defaultZoom={8}
-              defaultCenter={this.state.origin}>
+              defaultZoom={15}
+              defaultCenter={this.state.origin}
+              center={this.state.origin}>
 
-              {this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null}
+              {/*this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null*/}
+
 
               {this.state.markers.map((marker, index) => (
-               <Marker position={marker.position} key={index} />
+               <Marker title={marker.title} onClick={this._handle_marker_click.bind(this, marker)} label={marker.label} position={marker.position} key={index} />
              ))}
 
             </GoogleMap>
+
+            <DepartureBoard station={this.state.station}/>
+
           </div>
       </div>
 
