@@ -45,7 +45,6 @@ export default class Map extends React.Component {
       },
     }, (result, status) => {
       if(status == google.maps.DirectionsStatus.OK) {
-        // console.log(result)
         this.setState({
           directions: result
         })
@@ -82,12 +81,7 @@ export default class Map extends React.Component {
 
           this.state.origin = new google.maps.LatLng(results[0].geometry.location.A, results[0].geometry.location.F),
 
-
           this.getNearestBusStops();
-          console.log('south west: '+  this.state.southWestLat+': '+   this.state.southWestLong)
-          console.log('north east: '+  this.state.northEastLat+': '+   this.state.northEastLong)
-
-
 
       }
     }.bind(this));
@@ -107,17 +101,20 @@ export default class Map extends React.Component {
         success: function(json) {
           //plot stops on map
           for (var i = 0; i < json.markers.length; i++) {
+            console.log(json.markers[i])
             var location = {lat:json.markers[i].lat, lng: json.markers[i].lng};
 
-            console.log(json.markers)
             var marker = new google.maps.Marker({
                 position: location,
                 title:json.markers[i].name,
                 label:json.markers[i].name,
                 data:json.markers[i]
               });
+              this.state.markers.push(marker);
 
-            this.state.markers.push(marker);
+              this.setState({
+                markers: this.state.markers
+              });
           }
 
         }.bind(this),
@@ -134,7 +131,6 @@ export default class Map extends React.Component {
   }
 
   _handle_marker_click (marker) {
-    console.log()
     var name = marker.data.name.toString()
     this.setState({
       station: marker.data.name

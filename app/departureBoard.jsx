@@ -12,4 +12,10 @@ export default class DepartureBoard extends React.Component {
 
   }
 
+  getDepartures(){
+
+    
+
+  }
+
 }
