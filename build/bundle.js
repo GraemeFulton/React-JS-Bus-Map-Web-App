@@ -19805,7 +19805,8 @@
 	              icon: './img/bus.png',
 	              selected: false,
 	              lat: json.markers[i].lat,
-	              lng: json.markers[i].lng
+	              lng: json.markers[i].lng,
+	              animation: 2
 	            });
 	            this.state.markers.push(marker);
 
@@ -19832,6 +19833,7 @@
 	      for (var i = 0; i < this.state.markers.length; i++) {
 	        this.state.markers[i].icon = './img/bus.png';
 	        this.state.markers[i].selected = false;
+	        this.state.markers[i].animation = null;
 	      }
 	      //highlight selected marker
 	      if (marker.selected == false) {
@@ -19853,10 +19855,11 @@
 	      if (marker.selected == false) {
 	        this.state.origin = null;
 	        marker.icon = './img/bus2.png';
+	        marker.animation = 1;
 	        this.state.markers[index] = marker;
 	        this.setState({
 	          markers: this.state.markers,
-	          getDepartures: false
+	          getDepartures: null
 
 	        });
 	      }
@@ -19867,10 +19870,11 @@
 	      if (marker.selected == false) {
 	        this.state.origin = null;
 	        marker.icon = './img/bus.png';
+	        marker.animation = null;
 	        this.state.markers[index] = marker;
 	        this.setState({
 	          markers: this.state.markers,
-	          getDepartures: false
+	          getDepartures: null
 
 	        });
 	      }
@@ -19953,7 +19957,8 @@
 	                key: index,
 	                onMouseover: _this2._onMarkerMouseOver.bind(_this2, marker, index),
 	                onMouseout: _this2._onMarkerMouseOut.bind(_this2, marker, index),
-	                draggable: true
+	                draggable: true,
+	                animation: marker.animation
 	              });
 	            })
 	          )
