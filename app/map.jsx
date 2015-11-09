@@ -158,9 +158,8 @@ export default class Map extends React.Component {
 
   }
   _onMarkerMouseOver(marker, index) {
-
     if(marker.selected==false){
-    //  this.state.origin=new google.maps.LatLng(marker.lat, marker.lng)
+      this.state.origin=null
   marker.icon='./img/bus2.png'
   this.state.markers[index] = marker
   this.setState({
@@ -238,6 +237,7 @@ _onMarkerMouseOut(marker, index) {
               defaultZoom={15}
               defaultCenter={this.state.origin}
               center={this.state.origin}
+              draggable={true}
               >
 
               {/*this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null*/}
@@ -252,6 +252,7 @@ _onMarkerMouseOut(marker, index) {
                  key={index}
                  onMouseover={this._onMarkerMouseOver.bind(this, marker, index)}
                  onMouseout={this._onMarkerMouseOut.bind(this, marker, index)}
+                 draggable={true}
                  />
              ))}
 
