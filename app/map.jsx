@@ -140,7 +140,6 @@ export default class Map extends React.Component {
       this.state.markers[i].icon='./img/bus.png'
       this.state.markers[i].selected=false
       this.state.markers[i].animation=null
-
     }
     //highlight selected marker
     if(marker.selected==false){
@@ -150,6 +149,7 @@ export default class Map extends React.Component {
       marker.selected=false
     }
     marker.icon='./img/bus3.png'
+    marker.animation=null
     this.state.markers[index] = marker
     this.setState({
       station: marker.data,
@@ -163,7 +163,7 @@ export default class Map extends React.Component {
     if(marker.selected==false){
       this.state.origin=null
   marker.icon='./img/bus2.png'
-  marker.animation=1
+  marker.animation=null
   this.state.markers[index] = marker
   this.setState({
     markers:this.state.markers,
