@@ -19850,9 +19850,8 @@
 	  }, {
 	    key: '_onMarkerMouseOver',
 	    value: function _onMarkerMouseOver(marker, index) {
-
 	      if (marker.selected == false) {
-	        //  this.state.origin=new google.maps.LatLng(marker.lat, marker.lng)
+	        this.state.origin = null;
 	        marker.icon = './img/bus2.png';
 	        this.state.markers[index] = marker;
 	        this.setState({
@@ -19941,7 +19940,8 @@
 	              },
 	              defaultZoom: 15,
 	              defaultCenter: this.state.origin,
-	              center: this.state.origin
+	              center: this.state.origin,
+	              draggable: true
 	            },
 	            this.state.markers.map(function (marker, index) {
 	              return _react2.default.createElement(_reactGoogleMaps.Marker, {
@@ -19951,7 +19951,8 @@
 	                position: marker.position,
 	                key: index,
 	                onMouseover: _this2._onMarkerMouseOver.bind(_this2, marker, index),
-	                onMouseout: _this2._onMarkerMouseOut.bind(_this2, marker, index)
+	                onMouseout: _this2._onMarkerMouseOut.bind(_this2, marker, index),
+	                draggable: true
 	              });
 	            })
 	          )
