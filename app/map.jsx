@@ -111,7 +111,8 @@ export default class Map extends React.Component {
                 icon:'./img/bus.png',
                 selected:false,
                 lat:json.markers[i].lat,
-                lng:json.markers[i].lng
+                lng:json.markers[i].lng,
+                animation:2
               });
               this.state.markers.push(marker);
 
@@ -138,6 +139,7 @@ export default class Map extends React.Component {
     for (var i = 0; i < this.state.markers.length; i++) {
       this.state.markers[i].icon='./img/bus.png'
       this.state.markers[i].selected=false
+      this.state.markers[i].animation=null
 
     }
     //highlight selected marker
@@ -161,10 +163,11 @@ export default class Map extends React.Component {
     if(marker.selected==false){
       this.state.origin=null
   marker.icon='./img/bus2.png'
+  marker.animation=1
   this.state.markers[index] = marker
   this.setState({
     markers:this.state.markers,
-    getDepartures:false
+    getDepartures:null,
 
   });
 }
@@ -174,10 +177,11 @@ _onMarkerMouseOut(marker, index) {
   if(marker.selected==false){
     this.state.origin=null
   marker.icon='./img/bus.png'
+  marker.animation=null
   this.state.markers[index] = marker
   this.setState({
     markers:this.state.markers,
-    getDepartures:false
+    getDepartures:null
 
   });
 }
@@ -254,6 +258,7 @@ _onMarkerMouseOut(marker, index) {
                  onMouseover={this._onMarkerMouseOver.bind(this, marker, index)}
                  onMouseout={this._onMarkerMouseOut.bind(this, marker, index)}
                  draggable={true}
+                 animation={marker.animation}
                  />
              ))}
 
