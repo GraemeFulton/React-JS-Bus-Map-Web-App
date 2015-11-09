@@ -185,24 +185,52 @@ _onMarkerMouseOut(marker, index) {
 
 
   render () {
+    var container={
+      height:window.innerHeight-15
+    }
+    var leftPanel = {
+      height:"100%",
+      width:"16%",
+      float:"left",
+      backgroundColor:"#f8f8f8",
+      overflow:"hidden"
+    }
+    var searchStyle={
+      backgroundColor:"#ECECEC"
+    }
+    var padding={
+      padding:"10px",
+    }
+    var fullWidth={width:"98%"}
 
     return (
 
       <div>
-        <h4>Choose your location:</h4>
-        From:
-        <input type="text" ref="begin" value={this.inputContent}
-          onChange={this.changeContent} />
-        To:
-        <input type="text" ref="end" value={this.inputContent}
-            onChange={this.changeContent} />
-          <button className='search_button' onClick={this.sendContent}>Submit</button>
 
-          <div className="map">
+
+          <div style={container}>
+
+            <div style={leftPanel}>
+              <div style={searchStyle}>
+                <div style={padding}>
+                    Location:
+                    <input style={fullWidth} type="text" ref="begin" value={this.inputContent}
+                      onChange={this.changeContent} />
+                    <br/>
+                    To:
+                    <input style={fullWidth} type="text" ref="end" value={this.inputContent}
+                        onChange={this.changeContent} />
+                      <button className='search_button' onClick={this.sendContent}>Search</button>
+              </div>
+            </div>
+
+              <DepartureBoard station={this.state.station} getDepartures={this.state.getDepartures}/>
+            </div>
+
             <GoogleMap containerProps={{
                 style: {
                   height: "100%",
-                  width:"500px",
+                  width:"84%",
                   float:"left",
                   position:"relative"
                 },
@@ -229,11 +257,11 @@ _onMarkerMouseOut(marker, index) {
 
             </GoogleMap>
 
-            <DepartureBoard station={this.state.station} getDepartures={this.state.getDepartures}/>
 
           </div>
       </div>
 
     );
   }
+
 }

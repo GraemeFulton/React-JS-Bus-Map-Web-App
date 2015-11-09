@@ -21,15 +21,13 @@ export default class DepartureBoard extends React.Component {
       marginTop:'0px'
     };
     var departureBoardStyle = {
-      height:"500px",
-      padding:"10px",
-      overflow:"scroll"
-
+      overflowX:"scroll",
+      height:"80%"
     };
     if(this.props.getDepartures==true){
       this.getDepartures()
     }
-    var name = (typeof this.props.station.name === 'undefined') ? 'Select a station' : 'Departures from '+this.props.station.name;
+    var name = (typeof this.props.station.name === 'undefined') ? '' : 'Departures from '+this.props.station.name;
     return (
         <div style={departureBoardStyle}>
         <h4 style={headerStyle}>{name}</h4>
