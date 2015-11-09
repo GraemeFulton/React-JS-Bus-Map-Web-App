@@ -25,8 +25,8 @@ export default class Map extends React.Component {
       end:new google.maps.LatLng(51.51560467, -0.10225884),
       directionService: new google.maps.DirectionsService(),
       markers: [],
-      station:'no bus stop selected'
-
+      station:'no bus stop selected',
+      getDepartures:false
     };
   }
 
@@ -101,7 +101,6 @@ export default class Map extends React.Component {
         success: function(json) {
           //plot stops on map
           for (var i = 0; i < json.markers.length; i++) {
-            console.log(json.markers[i])
             var location = {lat:json.markers[i].lat, lng: json.markers[i].lng};
 
             var marker = new google.maps.Marker({
@@ -110,7 +109,9 @@ export default class Map extends React.Component {
                 label:json.markers[i].name,
                 data:json.markers[i],
                 icon:'./img/bus.png',
-                selected:false
+                selected:false,
+                lat:json.markers[i].lat,
+                lng:json.markers[i].lng
               });
               this.state.markers.push(marker);
 
@@ -128,8 +129,8 @@ export default class Map extends React.Component {
   }
 
   changeContent(e) {
-   this.state.begin=e.target.value
-    console.log(e.target.value)
+  //  this.state.begin=e.target.value
+  //   console.log(e.target.value)
   }
 
   _handle_marker_click (marker, index) {
@@ -137,6 +138,7 @@ export default class Map extends React.Component {
     for (var i = 0; i < this.state.markers.length; i++) {
       this.state.markers[i].icon='./img/bus.png'
       this.state.markers[i].selected=false
+
     }
     //highlight selected marker
     if(marker.selected==false){
@@ -148,8 +150,9 @@ export default class Map extends React.Component {
     marker.icon='./img/bus3.png'
     this.state.markers[index] = marker
     this.setState({
-      station: marker.data.name,
-      markers:this.state.markers
+      station: marker.data,
+      markers:this.state.markers,
+      getDepartures:true
     });
 
 
@@ -157,10 +160,13 @@ export default class Map extends React.Component {
   _onMarkerMouseOver(marker, index) {
 
     if(marker.selected==false){
+    //  this.state.origin=new google.maps.LatLng(marker.lat, marker.lng)
   marker.icon='./img/bus2.png'
   this.state.markers[index] = marker
   this.setState({
-    markers:this.state.markers
+    markers:this.state.markers,
+    getDepartures:false
+
   });
 }
 
@@ -170,7 +176,9 @@ _onMarkerMouseOut(marker, index) {
   marker.icon='./img/bus.png'
   this.state.markers[index] = marker
   this.setState({
-    markers:this.state.markers
+    markers:this.state.markers,
+    getDepartures:false
+
   });
 }
 }
@@ -194,6 +202,9 @@ _onMarkerMouseOut(marker, index) {
             <GoogleMap containerProps={{
                 style: {
                   height: "100%",
+                  width:"500px",
+                  float:"left",
+                  position:"relative"
                 },
               }}
               defaultZoom={15}
@@ -218,7 +229,7 @@ _onMarkerMouseOut(marker, index) {
 
             </GoogleMap>
 
-            <DepartureBoard station={this.state.station}/>
+            <DepartureBoard station={this.state.station} getDepartures={this.state.getDepartures}/>
 
           </div>
       </div>
