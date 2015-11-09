@@ -19865,6 +19865,7 @@
 	    key: '_onMarkerMouseOut',
 	    value: function _onMarkerMouseOut(marker, index) {
 	      if (marker.selected == false) {
+	        this.state.origin = null;
 	        marker.icon = './img/bus.png';
 	        this.state.markers[index] = marker;
 	        this.setState({
