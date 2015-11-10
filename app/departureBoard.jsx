@@ -13,28 +13,45 @@ export default class DepartureBoard extends React.Component {
       departures: [],
       noDepartures:''
     };
+    this.changeInput = this.changeInput.bind(this);
+
+  }
+
+  changeInput(destination){
+    this.props.onValueChange(this.props.station, destination)
+
   }
 
   render () {
     var headerStyle = {
-      color: 'rgb(92,193,146)',
-      marginTop:'0px'
+      background:'#3949AB',
+      color: '#fff',
+      marginTop:'0',
+      padding:'10px',
+      marginBottom:'0',
+      minHeight: "24px"
     };
+    var headerIcon = {
+      float:"none",
+      fontSize:"25px",
+      verticalAlign:"text-top"
+    }
     var departureBoardStyle = {
       overflowX:"scroll",
-      height:"80%"
+      height:"82%"
     };
     if(this.props.getDepartures==true){
       this.getDepartures()
     }
-    var name = (typeof this.props.station.name === 'undefined') ? '' : 'Departures from '+this.props.station.name;
+    var name = (typeof this.props.station.name === 'undefined') ? '' : this.props.station.name;
     return (
         <div style={departureBoardStyle}>
-        <h4 style={headerStyle}>{name}</h4>
-        <p>{this.state.noDepartures}</p>
+        <h4 style={headerStyle}><i style={headerIcon} className="material-icons">directions_bus</i> {name}</h4>
+        {this.state.noDepartures}
 
           {this.state.departures.map((departure, index) => (
             <DepartureItem
+              onValueChange={this.changeInput}
               key={index}
               destination={departure.destination}
               due={departure.estimatedWait}
@@ -50,7 +67,6 @@ export default class DepartureBoard extends React.Component {
   }
 
   getDepartures(){
-    if(this.props.getDepartures==true){
 
     var url='http://digitaslbi-id-test.herokuapp.com/bus-stops/'+this.props.station.id+'';
 
@@ -71,10 +87,12 @@ export default class DepartureBoard extends React.Component {
             else{
               this.state.noDepartures = ''
             }
-            this.setState({
-              departures:this.state.departures,
-              noDepartures:this.state.noDepartures
-            });
+            this.state.departures= this.state.departures;
+            this.state.noDepartures=this.state.noDepartures
+            // this.setState({
+            //   departures:this.state.departures,
+            //   noDepartures:this.state.noDepartures
+            // });
             console.log(this.state.departures)
         }.bind(this),
         error: function(e) {
@@ -82,7 +100,6 @@ export default class DepartureBoard extends React.Component {
         }.bind(this)
     });
 
-  }
 }
 
 }

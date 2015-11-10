@@ -16,6 +16,7 @@ export default class Map extends React.Component {
     this.setCoordinates = this.setCoordinates.bind(this);
     this.getNearestBusStops = this.getNearestBusStops.bind(this);
     this._handle_marker_click = this._handle_marker_click.bind(this);
+    this.changeInput = this.changeInput.bind(this);
 
     this.state = {
       origin: new google.maps.LatLng(51.5072, 0.1275),
@@ -31,17 +32,25 @@ export default class Map extends React.Component {
   }
 
   componentDidMount () {
-    this.setDirections()
+    //this.setDirections()
   }
 
-  setDirections(){
+  setDirections(departureTime){
+    var d = new Date();
+    var time = departureTime
+    time=time.split(':');
+    d.setHours(time[0]);
+    d.setMinutes(time[1]);
+    this.state.markers= []
     this.state.directionService.route({
       origin: this.state.begin,
       destination: this.state.end,
       travelMode: google.maps.TravelMode.TRANSIT,
       transitOptions: {
         modes: [google.maps.TransitMode.BUS],
-        routingPreference: google.maps.TransitRoutePreference.FEWER_TRANSFERS
+        departureTime: d,
+         routingPreference: google.maps.TransitRoutePreference.FEWER_TRANSFERS,
+          routingPreference: google.maps.TransitRoutePreference.LESS_WALKING
       },
     }, (result, status) => {
       if(status == google.maps.DirectionsStatus.OK) {
@@ -57,12 +66,13 @@ export default class Map extends React.Component {
   }
 
   sendContent(e) {
-    //$('.search_button').click();
+    this.state.directions=null
+    this.state.markers=[]
     this.state.begin = ReactDOM.findDOMNode(this.refs.begin).value
-    this.state.end = ReactDOM.findDOMNode(this.refs.end).value
+    //this.state.end = ReactDOM.findDOMNode(this.refs.end).value
 
     this.setCoordinates();
-    this.setDirections()
+    // this.setDirections()
 
   }
 
@@ -152,6 +162,7 @@ export default class Map extends React.Component {
     marker.animation=null
     this.state.markers[index] = marker
     this.setState({
+      directions:null,
       station: marker.data,
       markers:this.state.markers,
       getDepartures:true
@@ -168,7 +179,6 @@ export default class Map extends React.Component {
   this.setState({
     markers:this.state.markers,
     getDepartures:null,
-
   });
 }
 
@@ -187,6 +197,17 @@ _onMarkerMouseOut(marker, index) {
 }
 }
 
+changeInput(station, destination){
+  console.log(destination)
+  this.setState({
+    begin:new google.maps.LatLng(station.lat, station.lng),
+    end:destination.destination+' London',
+    departureTime:destination.departureTime
+  });
+  setTimeout(function(){  this.setDirections(destination.departureTime)
+}.bind(this), 400)
+
+}
 
   render () {
     var container={
@@ -194,13 +215,14 @@ _onMarkerMouseOut(marker, index) {
     }
     var leftPanel = {
       height:"100%",
-      width:"16%",
+      width:"22%",
       float:"left",
-      backgroundColor:"#f8f8f8",
+      backgroundColor:"#fff",
       overflow:"hidden"
     }
     var searchStyle={
-      backgroundColor:"#ECECEC"
+      backgroundColor:"#283593",
+      color:"#fff"
     }
     var padding={
       padding:"10px",
@@ -214,27 +236,24 @@ _onMarkerMouseOut(marker, index) {
 
           <div style={container}>
 
-            <div style={leftPanel}>
+            <div style={leftPanel} className="mdl-card mdl-shadow--2dp">
               <div style={searchStyle}>
-                <div style={padding}>
-                    Location:
-                    <input style={fullWidth} type="text" ref="begin" value={this.inputContent}
+                <div style={padding} className=" mdl-shadow--2dp">
+                    Where are you?
+                    <input className="mdl-textfield__input" style={fullWidth} type="text" ref="begin" value={this.inputContent}
                       onChange={this.changeContent} />
                     <br/>
-                    To:
-                    <input style={fullWidth} type="text" ref="end" value={this.inputContent}
-                        onChange={this.changeContent} />
-                      <button className='search_button' onClick={this.sendContent}>Search</button>
+                      <button className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this.sendContent}>Show Nearest Buses</button>
               </div>
             </div>
 
-              <DepartureBoard station={this.state.station} getDepartures={this.state.getDepartures}/>
+              <DepartureBoard onValueChange={this.changeInput} station={this.state.station} getDepartures={this.state.getDepartures}/>
             </div>
 
             <GoogleMap containerProps={{
                 style: {
                   height: "100%",
-                  width:"84%",
+                  width:"78%",
                   float:"left",
                   position:"relative"
                 },
@@ -245,7 +264,7 @@ _onMarkerMouseOut(marker, index) {
               draggable={true}
               >
 
-              {/*this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null*/}
+              {this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null}
 
 
               {this.state.markers.map((marker, index) => (
