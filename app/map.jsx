@@ -10,13 +10,19 @@ export default class Map extends React.Component {
   constructor(props) {
     super(props);
 
-    this.changeContent = this.changeContent.bind(this);
     this.sendContent = this.sendContent.bind(this);
     this.setDirections = this.setDirections.bind(this);
     this.setCoordinates = this.setCoordinates.bind(this);
     this.getNearestBusStops = this.getNearestBusStops.bind(this);
     this._handle_marker_click = this._handle_marker_click.bind(this);
     this.changeInput = this.changeInput.bind(this);
+
+    //set bounds to london town
+    var bounds= new google.maps.LatLngBounds();
+    var LondonNe= new google.maps.LatLng(51.22580742132281, -0.6591800781250186);
+    var LondonSw = new google.maps.LatLng(51.73893493080538, 0.43945273437498145);
+    bounds.extend(LondonNe);
+    bounds.extend(LondonSw);
 
     this.state = {
       origin: new google.maps.LatLng(51.5072, 0.1275),
@@ -27,12 +33,10 @@ export default class Map extends React.Component {
       directionService: new google.maps.DirectionsService(),
       markers: [],
       station:'no bus stop selected',
-      getDepartures:false
+      getDepartures:false,
+      bounds:bounds
     };
-  }
 
-  componentDidMount () {
-    //this.setDirections()
   }
 
   setDirections(departureTime){
@@ -69,10 +73,8 @@ export default class Map extends React.Component {
     this.state.directions=null
     this.state.markers=[]
     this.state.begin = ReactDOM.findDOMNode(this.refs.begin).value
-    //this.state.end = ReactDOM.findDOMNode(this.refs.end).value
-
+    $('.loading').show();
     this.setCoordinates();
-    // this.setDirections()
 
   }
 
@@ -139,13 +141,9 @@ export default class Map extends React.Component {
 
   }
 
-  changeContent(e) {
-  //  this.state.begin=e.target.value
-  //   console.log(e.target.value)
-  }
-
   _handle_marker_click (marker, index) {
     //clear all highlighted markers
+    $()
     for (var i = 0; i < this.state.markers.length; i++) {
       this.state.markers[i].icon='./img/bus.png'
       this.state.markers[i].selected=false
@@ -209,6 +207,11 @@ changeInput(station, destination){
 
 }
 
+componentDidUpdate(){
+  $('.loading').hide()
+
+}
+
   render () {
     var container={
       height:window.innerHeight-15
@@ -228,25 +231,36 @@ changeInput(station, destination){
       padding:"10px",
     }
     var fullWidth={width:"98%"}
+    var inputStyle = {
+   "border": "1px solid transparent",
+   "borderRadius": "1px",
+   "boxShadow": "0 2px 6px rgba(0, 0, 0, 0.3)",
+   "boxSizing": "border-box",
+   "MozBoxSizing": "border-box",
+   "fontSize": "14px",
+   "height": "32px",
+   "marginTop": "27px",
+   "outline": "none",
+   "padding": "0 12px",
+   "textOverflow": "ellipses",
+   "width": "400px"
+  }
+
 
     return (
 
       <div>
 
-
           <div style={container}>
-
             <div style={leftPanel} className="mdl-card mdl-shadow--2dp">
               <div style={searchStyle}>
                 <div style={padding} className=" mdl-shadow--2dp">
                     Where are you?
-                    <input className="mdl-textfield__input" style={fullWidth} type="text" ref="begin" value={this.inputContent}
-                      onChange={this.changeContent} />
+                    <input className="mdl-textfield__input" style={fullWidth} type="text" ref="begin" value={this.inputContent}/>
                     <br/>
                       <button className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this.sendContent}>Show Nearest Buses</button>
               </div>
             </div>
-
               <DepartureBoard onValueChange={this.changeInput} station={this.state.station} getDepartures={this.state.getDepartures}/>
             </div>
 
@@ -265,7 +279,13 @@ changeInput(station, destination){
               >
 
               {this.state.directions ? <DirectionsRenderer directions={this.state.directions} /> : null}
-
+              <SearchBox
+                       bounds={this.state.bounds}
+                       controlPosition={google.maps.ControlPosition.TOP_LEFT}
+                       ref="searchBox"
+                       onPlacesChanged={this.sendContent}
+                       types= '(cities)'
+                       style={inputStyle} />
 
               {this.state.markers.map((marker, index) => (
                <Marker
@@ -283,11 +303,11 @@ changeInput(station, destination){
 
             </GoogleMap>
 
-
           </div>
       </div>
 
     );
+
   }
 
 }
