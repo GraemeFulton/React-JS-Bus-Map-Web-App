@@ -25,17 +25,23 @@ export default class Map extends React.Component {
     bounds.extend(LondonSw);
 
     this.state = {
-      origin: new google.maps.LatLng(51.5072, 0.1275),
+      origin: new google.maps.LatLng(51.5073509,  -0.12775829999998223),
       // destination: new google.maps.LatLng(41.8525800, -87.6514100),
       directions: null,
       begin:new google.maps.LatLng(51.52783450, -0.04076115),
+      beginLng:51.5073509,
+      beginLat: -0.12775829999998223,
       end:new google.maps.LatLng(51.51560467, -0.10225884),
       directionService: new google.maps.DirectionsService(),
       markers: [],
       station:'no bus stop selected',
       getDepartures:false,
-      bounds:bounds
+      bounds:bounds,
+      zoom:15
     };
+
+    $('.loading').show();
+    this.setCoordinates();
 
   }
 
@@ -53,8 +59,8 @@ export default class Map extends React.Component {
       transitOptions: {
         modes: [google.maps.TransitMode.BUS],
         departureTime: d,
-         routingPreference: google.maps.TransitRoutePreference.FEWER_TRANSFERS,
-          routingPreference: google.maps.TransitRoutePreference.LESS_WALKING
+        routingPreference: google.maps.TransitRoutePreference.FEWER_TRANSFERS,
+        routingPreference: google.maps.TransitRoutePreference.LESS_WALKING
       },
     }, (result, status) => {
       if(status == google.maps.DirectionsStatus.OK) {
@@ -72,31 +78,27 @@ export default class Map extends React.Component {
   sendContent(e) {
     this.state.directions=null
     this.state.markers=[]
-    this.state.begin = ReactDOM.findDOMNode(this.refs.begin).value
+    this.state.begin = this.refs.searchBox.getPlaces();
+    this.state.beginLng= this.state.begin[0].geometry.location.A
+    this.state.beginLat = this.state.begin[0].geometry.location.F
+    console.log(  this.state.begin)
     $('.loading').show();
     this.setCoordinates();
 
   }
 
   setCoordinates(){
-    var geocoder = new google.maps.Geocoder();
 
-    geocoder.geocode( { 'address': this.state.begin}, function(results, status) {
+          this.state.northEastLat = this.state.beginLng+0.01
+          this.state.northEastLong =this.state.beginLat+0.01
 
-      if (status == google.maps.GeocoderStatus.OK)
-      {
-          this.state.northEastLat = results[0].geometry.location.A+0.01
-          this.state.northEastLong = results[0].geometry.location.F+0.01
+          this.state.southWestLat = this.state.beginLng-0.01
+          this.state.southWestLong =this.state.beginLat-0.01
 
-          this.state.southWestLat = results[0].geometry.location.A-0.01
-          this.state.southWestLong = results[0].geometry.location.F-0.01
-
-          this.state.origin = new google.maps.LatLng(results[0].geometry.location.A, results[0].geometry.location.F),
+          this.state.origin = new google.maps.LatLng(this.state.beginLng, this.state.beginLat),
 
           this.getNearestBusStops();
 
-      }
-    }.bind(this));
   }
 
   getNearestBusStops(){
@@ -107,7 +109,6 @@ export default class Map extends React.Component {
        type: 'GET',
         url: url,
         async: false,
-        // jsonpCallback: 'jsonCallback',
         contentType: "application/json",
         dataType: 'jsonp',
         success: function(json) {
@@ -143,7 +144,6 @@ export default class Map extends React.Component {
 
   _handle_marker_click (marker, index) {
     //clear all highlighted markers
-    $()
     for (var i = 0; i < this.state.markers.length; i++) {
       this.state.markers[i].icon='./img/bus.png'
       this.state.markers[i].selected=false
@@ -196,13 +196,12 @@ _onMarkerMouseOut(marker, index) {
 }
 
 changeInput(station, destination){
-  console.log(destination)
   this.setState({
     begin:new google.maps.LatLng(station.lat, station.lng),
-    end:destination.destination+' London',
+    end:destination.destination+', London',
     departureTime:destination.departureTime
   });
-  setTimeout(function(){  this.setDirections(destination.departureTime)
+  setTimeout(function(){  this.setDirections(destination.departureTime);
 }.bind(this), 400)
 
 }
@@ -219,7 +218,7 @@ componentDidUpdate(){
     var leftPanel = {
       height:"100%",
       width:"22%",
-      float:"left",
+      float:"right",
       backgroundColor:"#fff",
       overflow:"hidden"
     }
@@ -238,14 +237,36 @@ componentDidUpdate(){
    "boxSizing": "border-box",
    "MozBoxSizing": "border-box",
    "fontSize": "14px",
-   "height": "32px",
-   "marginTop": "27px",
+   "height": "36px",
+   "marginTop": "25px",
    "outline": "none",
    "padding": "0 12px",
    "textOverflow": "ellipses",
-   "width": "400px"
+   "width": "216px"
+  }
+  var headerStyle = {
+    background:'#3949AB',
+    color: '#fff',
+    marginTop:'0',
+    padding:'10px',
+    marginBottom:'0',
+    minHeight: "24px"
+  };
+  var headerIcon = {
+    fontSize:"25px",
+    verticalAlign:"text-top",
+    marginRight:"8px"
+  }
+  var busIcon={
+    marginRight:"5px"
+  }
+  var searchStyle={
+    zIndex:"9999",
+    left:"305px",
+    top:"25px"
   }
 
+  var name = (typeof this.state.station.name === 'undefined') ? 'No bus selected' : this.state.station.name;
 
     return (
 
@@ -253,14 +274,10 @@ componentDidUpdate(){
 
           <div style={container}>
             <div style={leftPanel} className="mdl-card mdl-shadow--2dp">
-              <div style={searchStyle}>
-                <div style={padding} className=" mdl-shadow--2dp">
-                    Where are you?
-                    <input className="mdl-textfield__input" style={fullWidth} type="text" ref="begin" value={this.inputContent}/>
-                    <br/>
-                      <button className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this.sendContent}>Show Nearest Buses</button>
-              </div>
-            </div>
+
+              <h4 style={headerStyle}> Departure Board</h4>
+                <p style={headerStyle}><i style={busIcon} className="material-icons">directions_bus</i> {name}</p>
+
               <DepartureBoard onValueChange={this.changeInput} station={this.state.station} getDepartures={this.state.getDepartures}/>
             </div>
 
@@ -273,6 +290,7 @@ componentDidUpdate(){
                 },
               }}
               defaultZoom={15}
+              zoom={this.state.zoom}
               defaultCenter={this.state.origin}
               center={this.state.origin}
               draggable={true}
@@ -286,6 +304,8 @@ componentDidUpdate(){
                        onPlacesChanged={this.sendContent}
                        types= '(cities)'
                        style={inputStyle} />
+                     <button style={searchStyle} className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this.sendContent}><i className="material-icons">search</i></button>
+
 
               {this.state.markers.map((marker, index) => (
                <Marker

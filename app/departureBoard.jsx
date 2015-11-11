@@ -23,32 +23,16 @@ export default class DepartureBoard extends React.Component {
   }
 
   render () {
-    var headerStyle = {
-      background:'#3949AB',
-      color: '#fff',
-      marginTop:'0',
-      padding:'10px',
-      marginBottom:'0',
-      minHeight: "24px"
-    };
-    var headerIcon = {
-      float:"none",
-      fontSize:"25px",
-      verticalAlign:"text-top"
-    }
     var departureBoardStyle = {
       overflowX:"scroll",
-      height:"82%"
+      height:"100%"
     };
     if(this.props.getDepartures==true){
       this.getDepartures()
     }
-    var name = (typeof this.props.station.name === 'undefined') ? '' : this.props.station.name;
     return (
         <div style={departureBoardStyle}>
-        <h4 style={headerStyle}><i style={headerIcon} className="material-icons">directions_bus</i> {name}</h4>
-        {this.state.noDepartures}
-
+          {this.state.noDepartures}
           {this.state.departures.map((departure, index) => (
             <DepartureItem
               onValueChange={this.changeInput}
@@ -80,19 +64,16 @@ export default class DepartureBoard extends React.Component {
         success: function(json) {
           //plot stops on map
             this.state.departures=json.arrivals;
-            console.log(this.state.departures)
             if (this.state.departures[0] == null) {
               this.state.noDepartures = 'No more departures'
             }
             else{
               this.state.noDepartures = ''
             }
-            this.state.departures= this.state.departures;
-            this.state.noDepartures=this.state.noDepartures
-            // this.setState({
-            //   departures:this.state.departures,
-            //   noDepartures:this.state.noDepartures
-            // });
+            this.setState({
+              departures:this.state.departures,
+              noDepartures:this.state.noDepartures
+            });
             console.log(this.state.departures)
         }.bind(this),
         error: function(e) {
