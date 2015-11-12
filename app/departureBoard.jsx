@@ -22,14 +22,19 @@ export default class DepartureBoard extends React.Component {
 
   }
 
+  componentWillReceiveProps(){
+    if(this.props.getDepartures==true){
+      this.getDepartures()
+    }
+
+  }
+
   render () {
     var departureBoardStyle = {
       overflowX:"scroll",
       height:"100%"
     };
-    if(this.props.getDepartures==true){
-      this.getDepartures()
-    }
+
     return (
         <div style={departureBoardStyle}>
           {this.state.noDepartures}
@@ -74,7 +79,6 @@ export default class DepartureBoard extends React.Component {
               departures:this.state.departures,
               noDepartures:this.state.noDepartures
             });
-            console.log(this.state.departures)
         }.bind(this),
         error: function(e) {
            console.log(e.message);

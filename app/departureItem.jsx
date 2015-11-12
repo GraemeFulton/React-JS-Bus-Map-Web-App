@@ -21,17 +21,20 @@ export default class DepartureItem extends React.Component {
 
   render () {
     var headerStyle = {
-      color: 'rgb(69,79,179)',
-      marginTop:"0px"
+      color: '#0D47A1',
+      marginTop:"0px",
+      fontSize:"16px"
     };
     var listItem= {
       background:'#fff',
       borderTop:"1px solid rgb(27,43,98)",
       marginBottom:"0px",
-      padding:"8px"
+      padding:"12px"
     }
     var pStyle={
       marginBottom:'0px'
+    }
+    var buttonStyle={
     }
 
     var destination = (typeof this.props.destination === 'undefined') ? 'No destinations' :this.props.destination;
@@ -41,7 +44,7 @@ export default class DepartureItem extends React.Component {
         <p style={pStyle}>Estimated arrival: {this.props.due}</p>
         <p style={pStyle}>Departure time: {this.props.departureTime}</p>
         <p style={pStyle}>Bus Number: {this.props.number}</p>
-        <button className="mdl-button mdl-js-button mdl-js-ripple-effect">Show Route</button>
+        <button style={buttonStyle}className="mdl-button mdl-js-button mdl-button--primary mdl-js-ripple-effect">Show Route</button>
         </div>
         );
 

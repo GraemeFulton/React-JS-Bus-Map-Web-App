@@ -15,7 +15,8 @@ export default class Map extends React.Component {
     this.setCoordinates = this.setCoordinates.bind(this);
     this.getNearestBusStops = this.getNearestBusStops.bind(this);
     this._handle_marker_click = this._handle_marker_click.bind(this);
-    this.changeInput = this.changeInput.bind(this);
+    this.showTransitDirections = this.showTransitDirections.bind(this);
+    this._searchButtonClick = this._searchButtonClick.bind(this);
 
     //set bounds to london town
     var bounds= new google.maps.LatLngBounds();
@@ -51,7 +52,7 @@ export default class Map extends React.Component {
     time=time.split(':');
     d.setHours(time[0]);
     d.setMinutes(time[1]);
-    this.state.markers= []
+    //this.state.markers= []
     this.state.directionService.route({
       origin: this.state.begin,
       destination: this.state.end,
@@ -74,14 +75,28 @@ export default class Map extends React.Component {
       }
     });
   }
+  _searchButtonClick(){
+    this.state.directions=null
+    this.state.markers=[]
 
+    this.state.markers.push({
+       position: this.state.begin[0].geometry.location
+     });
+
+    $('.loading').show();
+    this.setCoordinates();
+  }
   sendContent(e) {
     this.state.directions=null
     this.state.markers=[]
     this.state.begin = this.refs.searchBox.getPlaces();
     this.state.beginLng= this.state.begin[0].geometry.location.A
     this.state.beginLat = this.state.begin[0].geometry.location.F
-    console.log(  this.state.begin)
+
+    this.state.markers.push({
+       position: this.state.begin[0].geometry.location
+     });
+
     $('.loading').show();
     this.setCoordinates();
 
@@ -143,6 +158,7 @@ export default class Map extends React.Component {
   }
 
   _handle_marker_click (marker, index) {
+    this.state.showTransit=false;
     //clear all highlighted markers
     for (var i = 0; i < this.state.markers.length; i++) {
       this.state.markers[i].icon='./img/bus.png'
@@ -163,12 +179,17 @@ export default class Map extends React.Component {
       directions:null,
       station: marker.data,
       markers:this.state.markers,
-      getDepartures:true
+      getDepartures:true,
+      origin:marker.position
     });
+    this.forceUpdate()
 
 
   }
   _onMarkerMouseOver(marker, index) {
+    if(this.state.showTransit==true){
+      return false
+    }
     if(marker.selected==false){
       this.state.origin=null
   marker.icon='./img/bus2.png'
@@ -182,6 +203,9 @@ export default class Map extends React.Component {
 
 }
 _onMarkerMouseOut(marker, index) {
+  if(this.state.showTransit==true){
+    return false
+  }
   if(marker.selected==false){
     this.state.origin=null
   marker.icon='./img/bus.png'
@@ -190,16 +214,16 @@ _onMarkerMouseOut(marker, index) {
   this.setState({
     markers:this.state.markers,
     getDepartures:null
-
   });
 }
 }
 
-changeInput(station, destination){
+showTransitDirections(station, destination){
   this.setState({
     begin:new google.maps.LatLng(station.lat, station.lng),
     end:destination.destination+', London',
-    departureTime:destination.departureTime
+    departureTime:destination.departureTime,
+    showTransit:true
   });
   setTimeout(function(){  this.setDirections(destination.departureTime);
 }.bind(this), 400)
@@ -216,20 +240,9 @@ componentDidUpdate(){
       height:window.innerHeight-15
     }
     var leftPanel = {
-      height:"100%",
-      width:"22%",
-      float:"right",
       backgroundColor:"#fff",
       overflow:"hidden"
     }
-    var searchStyle={
-      backgroundColor:"#283593",
-      color:"#fff"
-    }
-    var padding={
-      padding:"10px",
-    }
-    var fullWidth={width:"98%"}
     var inputStyle = {
    "border": "1px solid transparent",
    "borderRadius": "1px",
@@ -237,15 +250,12 @@ componentDidUpdate(){
    "boxSizing": "border-box",
    "MozBoxSizing": "border-box",
    "fontSize": "14px",
-   "height": "36px",
-   "marginTop": "25px",
    "outline": "none",
    "padding": "0 12px",
    "textOverflow": "ellipses",
-   "width": "216px"
   }
   var headerStyle = {
-    background:'#3949AB',
+    background:'#0D47A1',
     color: '#fff',
     marginTop:'0',
     padding:'10px',
@@ -253,9 +263,18 @@ componentDidUpdate(){
     minHeight: "24px"
   };
   var headerIcon = {
-    fontSize:"25px",
+    fontSize:"24px",
     verticalAlign:"text-top",
     marginRight:"8px"
+  }
+  var busHeader={
+    background:'#2962FF',
+    color: '#fff',
+    marginTop:'0',
+    padding:'10px',
+    marginBottom:'0',
+    minHeight: "24px",
+    fontSize:"18px"
   }
   var busIcon={
     marginRight:"5px"
@@ -263,31 +282,18 @@ componentDidUpdate(){
   var searchStyle={
     zIndex:"9999",
     left:"305px",
-    top:"25px"
+    top:"25px",
+    background:"#2962FF"
   }
 
   var name = (typeof this.state.station.name === 'undefined') ? 'No bus selected' : this.state.station.name;
-
     return (
 
       <div>
 
           <div style={container}>
-            <div style={leftPanel} className="mdl-card mdl-shadow--2dp">
-
-              <h4 style={headerStyle}> Departure Board</h4>
-                <p style={headerStyle}><i style={busIcon} className="material-icons">directions_bus</i> {name}</p>
-
-              <DepartureBoard onValueChange={this.changeInput} station={this.state.station} getDepartures={this.state.getDepartures}/>
-            </div>
-
             <GoogleMap containerProps={{
-                style: {
-                  height: "100%",
-                  width:"78%",
-                  float:"left",
-                  position:"relative"
-                },
+                className:"google-map"
               }}
               defaultZoom={15}
               zoom={this.state.zoom}
@@ -304,7 +310,7 @@ componentDidUpdate(){
                        onPlacesChanged={this.sendContent}
                        types= '(cities)'
                        style={inputStyle} />
-                     <button style={searchStyle} className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this.sendContent}><i className="material-icons">search</i></button>
+                     <button style={searchStyle} className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this._searchButtonClick}><i className="material-icons">search</i></button>
 
 
               {this.state.markers.map((marker, index) => (
@@ -322,6 +328,14 @@ componentDidUpdate(){
              ))}
 
             </GoogleMap>
+
+            <div style={leftPanel} className="left-panel mdl-card mdl-shadow--2dp">
+
+              <h4 style={headerStyle}> Departure Board</h4>
+                <p style={busHeader}><i style={busIcon} className="material-icons">directions_bus</i> {name}</p>
+
+              <DepartureBoard onValueChange={this.showTransitDirections} station={this.state.station} getDepartures={this.state.getDepartures}/>
+            </div>
 
           </div>
       </div>
