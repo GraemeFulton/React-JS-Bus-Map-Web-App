@@ -19701,44 +19701,63 @@
 
 	    var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Map).call(this, props));
 
-	    _this3.changeContent = _this3.changeContent.bind(_this3);
 	    _this3.sendContent = _this3.sendContent.bind(_this3);
 	    _this3.setDirections = _this3.setDirections.bind(_this3);
 	    _this3.setCoordinates = _this3.setCoordinates.bind(_this3);
 	    _this3.getNearestBusStops = _this3.getNearestBusStops.bind(_this3);
 	    _this3._handle_marker_click = _this3._handle_marker_click.bind(_this3);
+	    _this3.showTransitDirections = _this3.showTransitDirections.bind(_this3);
+	    _this3._searchButtonClick = _this3._searchButtonClick.bind(_this3);
+
+	    //set bounds to london town
+	    var bounds = new google.maps.LatLngBounds();
+	    var LondonNe = new google.maps.LatLng(51.22580742132281, -0.6591800781250186);
+	    var LondonSw = new google.maps.LatLng(51.73893493080538, 0.43945273437498145);
+	    bounds.extend(LondonNe);
+	    bounds.extend(LondonSw);
 
 	    _this3.state = {
-	      origin: new google.maps.LatLng(51.5072, 0.1275),
+	      origin: new google.maps.LatLng(51.5073509, -0.12775829999998223),
 	      // destination: new google.maps.LatLng(41.8525800, -87.6514100),
 	      directions: null,
 	      begin: new google.maps.LatLng(51.52783450, -0.04076115),
+	      beginLng: 51.5073509,
+	      beginLat: -0.12775829999998223,
 	      end: new google.maps.LatLng(51.51560467, -0.10225884),
 	      directionService: new google.maps.DirectionsService(),
 	      markers: [],
 	      station: 'no bus stop selected',
-	      getDepartures: false
+	      getDepartures: false,
+	      bounds: bounds,
+	      zoom: 15
 	    };
+
+	    $('.loading').show();
+	    _this3.setCoordinates();
+
 	    return _this3;
 	  }
 
 	  _createClass(Map, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      this.setDirections();
-	    }
-	  }, {
 	    key: 'setDirections',
-	    value: function setDirections() {
+	    value: function setDirections(departureTime) {
 	      var _this = this;
 
+	      var d = new Date();
+	      var time = departureTime;
+	      time = time.split(':');
+	      d.setHours(time[0]);
+	      d.setMinutes(time[1]);
+	      //this.state.markers= []
 	      this.state.directionService.route({
 	        origin: this.state.begin,
 	        destination: this.state.end,
 	        travelMode: google.maps.TravelMode.TRANSIT,
 	        transitOptions: {
 	          modes: [google.maps.TransitMode.BUS],
-	          routingPreference: google.maps.TransitRoutePreference.FEWER_TRANSFERS
+	          departureTime: d,
+	          routingPreference: google.maps.TransitRoutePreference.FEWER_TRANSFERS,
+	          routingPreference: google.maps.TransitRoutePreference.LESS_WALKING
 	        }
 	      }, function (result, status) {
 	        if (status == google.maps.DirectionsStatus.OK) {
@@ -19752,32 +19771,45 @@
 	      });
 	    }
 	  }, {
+	    key: '_searchButtonClick',
+	    value: function _searchButtonClick() {
+	      this.state.directions = null;
+	      this.state.markers = [];
+
+	      this.state.markers.push({
+	        position: this.state.begin[0].geometry.location
+	      });
+
+	      $('.loading').show();
+	      this.setCoordinates();
+	    }
+	  }, {
 	    key: 'sendContent',
 	    value: function sendContent(e) {
-	      //$('.search_button').click();
-	      this.state.begin = _reactDom2.default.findDOMNode(this.refs.begin).value;
-	      this.state.end = _reactDom2.default.findDOMNode(this.refs.end).value;
+	      this.state.directions = null;
+	      this.state.markers = [];
+	      this.state.begin = this.refs.searchBox.getPlaces();
+	      this.state.beginLng = this.state.begin[0].geometry.location.A;
+	      this.state.beginLat = this.state.begin[0].geometry.location.F;
 
+	      this.state.markers.push({
+	        position: this.state.begin[0].geometry.location
+	      });
+
+	      $('.loading').show();
 	      this.setCoordinates();
-	      this.setDirections();
 	    }
 	  }, {
 	    key: 'setCoordinates',
 	    value: function setCoordinates() {
-	      var geocoder = new google.maps.Geocoder();
 
-	      geocoder.geocode({ 'address': this.state.begin }, (function (results, status) {
+	      this.state.northEastLat = this.state.beginLng + 0.01;
+	      this.state.northEastLong = this.state.beginLat + 0.01;
 
-	        if (status == google.maps.GeocoderStatus.OK) {
-	          this.state.northEastLat = results[0].geometry.location.A + 0.01;
-	          this.state.northEastLong = results[0].geometry.location.F + 0.01;
+	      this.state.southWestLat = this.state.beginLng - 0.01;
+	      this.state.southWestLong = this.state.beginLat - 0.01;
 
-	          this.state.southWestLat = results[0].geometry.location.A - 0.01;
-	          this.state.southWestLong = results[0].geometry.location.F - 0.01;
-
-	          this.state.origin = new google.maps.LatLng(results[0].geometry.location.A, results[0].geometry.location.F), this.getNearestBusStops();
-	        }
-	      }).bind(this));
+	      this.state.origin = new google.maps.LatLng(this.state.beginLng, this.state.beginLat), this.getNearestBusStops();
 	    }
 	  }, {
 	    key: 'getNearestBusStops',
@@ -19789,7 +19821,6 @@
 	        type: 'GET',
 	        url: url,
 	        async: false,
-	        // jsonpCallback: 'jsonCallback',
 	        contentType: "application/json",
 	        dataType: 'jsonp',
 	        success: (function (json) {
@@ -19821,14 +19852,9 @@
 	      });
 	    }
 	  }, {
-	    key: 'changeContent',
-	    value: function changeContent(e) {
-	      //  this.state.begin=e.target.value
-	      //   console.log(e.target.value)
-	    }
-	  }, {
 	    key: '_handle_marker_click',
 	    value: function _handle_marker_click(marker, index) {
+	      this.state.showTransit = false;
 	      //clear all highlighted markers
 	      for (var i = 0; i < this.state.markers.length; i++) {
 	        this.state.markers[i].icon = './img/bus.png';
@@ -19842,31 +19868,40 @@
 	        marker.selected = false;
 	      }
 	      marker.icon = './img/bus3.png';
+	      marker.animation = null;
 	      this.state.markers[index] = marker;
 	      this.setState({
+	        directions: null,
 	        station: marker.data,
 	        markers: this.state.markers,
-	        getDepartures: true
+	        getDepartures: true,
+	        origin: marker.position
 	      });
+	      this.forceUpdate();
 	    }
 	  }, {
 	    key: '_onMarkerMouseOver',
 	    value: function _onMarkerMouseOver(marker, index) {
+	      if (this.state.showTransit == true) {
+	        return false;
+	      }
 	      if (marker.selected == false) {
 	        this.state.origin = null;
 	        marker.icon = './img/bus2.png';
-	        marker.animation = 1;
+	        marker.animation = null;
 	        this.state.markers[index] = marker;
 	        this.setState({
 	          markers: this.state.markers,
 	          getDepartures: null
-
 	        });
 	      }
 	    }
 	  }, {
 	    key: '_onMarkerMouseOut',
 	    value: function _onMarkerMouseOut(marker, index) {
+	      if (this.state.showTransit == true) {
+	        return false;
+	      }
 	      if (marker.selected == false) {
 	        this.state.origin = null;
 	        marker.icon = './img/bus.png';
@@ -19875,9 +19910,26 @@
 	        this.setState({
 	          markers: this.state.markers,
 	          getDepartures: null
-
 	        });
 	      }
+	    }
+	  }, {
+	    key: 'showTransitDirections',
+	    value: function showTransitDirections(station, destination) {
+	      this.setState({
+	        begin: new google.maps.LatLng(station.lat, station.lng),
+	        end: destination.destination + ', London',
+	        departureTime: destination.departureTime,
+	        showTransit: true
+	      });
+	      setTimeout((function () {
+	        this.setDirections(destination.departureTime);
+	      }).bind(this), 400);
+	    }
+	  }, {
+	    key: 'componentDidUpdate',
+	    value: function componentDidUpdate() {
+	      $('.loading').hide();
 	    }
 	  }, {
 	    key: 'render',
@@ -19888,20 +19940,53 @@
 	        height: window.innerHeight - 15
 	      };
 	      var leftPanel = {
-	        height: "100%",
-	        width: "16%",
-	        float: "left",
-	        backgroundColor: "#f8f8f8",
+	        backgroundColor: "#fff",
 	        overflow: "hidden"
 	      };
+	      var inputStyle = {
+	        "border": "1px solid transparent",
+	        "borderRadius": "1px",
+	        "boxShadow": "0 2px 6px rgba(0, 0, 0, 0.3)",
+	        "boxSizing": "border-box",
+	        "MozBoxSizing": "border-box",
+	        "fontSize": "14px",
+	        "outline": "none",
+	        "padding": "0 12px",
+	        "textOverflow": "ellipses"
+	      };
+	      var headerStyle = {
+	        background: '#0D47A1',
+	        color: '#fff',
+	        marginTop: '0',
+	        padding: '10px',
+	        marginBottom: '0',
+	        minHeight: "24px"
+	      };
+	      var headerIcon = {
+	        fontSize: "24px",
+	        verticalAlign: "text-top",
+	        marginRight: "8px"
+	      };
+	      var busHeader = {
+	        background: '#2962FF',
+	        color: '#fff',
+	        marginTop: '0',
+	        padding: '10px',
+	        marginBottom: '0',
+	        minHeight: "24px",
+	        fontSize: "18px"
+	      };
+	      var busIcon = {
+	        marginRight: "5px"
+	      };
 	      var searchStyle = {
-	        backgroundColor: "#ECECEC"
+	        zIndex: "9999",
+	        left: "305px",
+	        top: "25px",
+	        background: "#2962FF"
 	      };
-	      var padding = {
-	        padding: "10px"
-	      };
-	      var fullWidth = { width: "98%" };
 
+	      var name = typeof this.state.station.name === 'undefined' ? 'No bus selected' : this.state.station.name;
 	      return _react2.default.createElement(
 	        'div',
 	        null,
@@ -19909,45 +19994,33 @@
 	          'div',
 	          { style: container },
 	          _react2.default.createElement(
-	            'div',
-	            { style: leftPanel },
-	            _react2.default.createElement(
-	              'div',
-	              { style: searchStyle },
-	              _react2.default.createElement(
-	                'div',
-	                { style: padding },
-	                'Location:',
-	                _react2.default.createElement('input', { style: fullWidth, type: 'text', ref: 'begin', value: this.inputContent,
-	                  onChange: this.changeContent }),
-	                _react2.default.createElement('br', null),
-	                'To:',
-	                _react2.default.createElement('input', { style: fullWidth, type: 'text', ref: 'end', value: this.inputContent,
-	                  onChange: this.changeContent }),
-	                _react2.default.createElement(
-	                  'button',
-	                  { className: 'search_button', onClick: this.sendContent },
-	                  'Search'
-	                )
-	              )
-	            ),
-	            _react2.default.createElement(_departureBoard2.default, { station: this.state.station, getDepartures: this.state.getDepartures })
-	          ),
-	          _react2.default.createElement(
 	            _reactGoogleMaps.GoogleMap,
 	            { containerProps: {
-	                style: {
-	                  height: "100%",
-	                  width: "84%",
-	                  float: "left",
-	                  position: "relative"
-	                }
+	                className: "google-map"
 	              },
 	              defaultZoom: 15,
+	              zoom: this.state.zoom,
 	              defaultCenter: this.state.origin,
 	              center: this.state.origin,
 	              draggable: true
 	            },
+	            this.state.directions ? _react2.default.createElement(_reactGoogleMaps.DirectionsRenderer, { directions: this.state.directions }) : null,
+	            _react2.default.createElement(_reactGoogleMaps.SearchBox, {
+	              bounds: this.state.bounds,
+	              controlPosition: google.maps.ControlPosition.TOP_LEFT,
+	              ref: 'searchBox',
+	              onPlacesChanged: this.sendContent,
+	              types: '(cities)',
+	              style: inputStyle }),
+	            _react2.default.createElement(
+	              'button',
+	              { style: searchStyle, className: 'mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent', onClick: this._searchButtonClick },
+	              _react2.default.createElement(
+	                'i',
+	                { className: 'material-icons' },
+	                'search'
+	              )
+	            ),
 	            this.state.markers.map(function (marker, index) {
 	              return _react2.default.createElement(_reactGoogleMaps.Marker, {
 	                icon: marker.icon,
@@ -19961,6 +20034,27 @@
 	                animation: marker.animation
 	              });
 	            })
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { style: leftPanel, className: 'left-panel mdl-card mdl-shadow--2dp' },
+	            _react2.default.createElement(
+	              'h4',
+	              { style: headerStyle },
+	              ' Departure Board'
+	            ),
+	            _react2.default.createElement(
+	              'p',
+	              { style: busHeader },
+	              _react2.default.createElement(
+	                'i',
+	                { style: busIcon, className: 'material-icons' },
+	                'directions_bus'
+	              ),
+	              ' ',
+	              name
+	            ),
+	            _react2.default.createElement(_departureBoard2.default, { onValueChange: this.showTransitDirections, station: this.state.station, getDepartures: this.state.getDepartures })
 	          )
 	        )
 	      );
@@ -23794,45 +23888,46 @@
 	  function DepartureBoard(props) {
 	    _classCallCheck(this, DepartureBoard);
 
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(DepartureBoard).call(this, props));
+	    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(DepartureBoard).call(this, props));
 
-	    _this.state = {
+	    _this2.state = {
 	      departures: [],
 	      noDepartures: ''
 	    };
-	    return _this;
+	    _this2.changeInput = _this2.changeInput.bind(_this2);
+
+	    return _this2;
 	  }
 
 	  _createClass(DepartureBoard, [{
-	    key: 'render',
-	    value: function render() {
-	      var headerStyle = {
-	        color: 'rgb(92,193,146)',
-	        marginTop: '0px'
-	      };
-	      var departureBoardStyle = {
-	        overflowX: "scroll",
-	        height: "80%"
-	      };
+	    key: 'changeInput',
+	    value: function changeInput(destination) {
+	      this.props.onValueChange(this.props.station, destination);
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps() {
 	      if (this.props.getDepartures == true) {
 	        this.getDepartures();
 	      }
-	      var name = typeof this.props.station.name === 'undefined' ? '' : 'Departures from ' + this.props.station.name;
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this = this;
+
+	      var departureBoardStyle = {
+	        overflowX: "scroll",
+	        height: "100%"
+	      };
+
 	      return _react2.default.createElement(
 	        'div',
 	        { style: departureBoardStyle },
-	        _react2.default.createElement(
-	          'h4',
-	          { style: headerStyle },
-	          name
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          this.state.noDepartures
-	        ),
+	        this.state.noDepartures,
 	        this.state.departures.map(function (departure, index) {
 	          return _react2.default.createElement(_departureItem2.default, {
+	            onValueChange: _this.changeInput,
 	            key: index,
 	            destination: departure.destination,
 	            due: departure.estimatedWait,
@@ -23846,37 +23941,33 @@
 	  }, {
 	    key: 'getDepartures',
 	    value: function getDepartures() {
-	      if (this.props.getDepartures == true) {
 
-	        var url = 'http://digitaslbi-id-test.herokuapp.com/bus-stops/' + this.props.station.id + '';
+	      var url = 'http://digitaslbi-id-test.herokuapp.com/bus-stops/' + this.props.station.id + '';
 
-	        $.ajax({
-	          type: 'GET',
-	          url: url,
-	          async: false,
-	          // jsonpCallback: 'jsonCallback',
-	          contentType: "application/json",
-	          dataType: 'jsonp',
-	          success: (function (json) {
-	            //plot stops on map
-	            this.state.departures = json.arrivals;
-	            console.log(this.state.departures);
-	            if (this.state.departures[0] == null) {
-	              this.state.noDepartures = 'No more departures';
-	            } else {
-	              this.state.noDepartures = '';
-	            }
-	            this.setState({
-	              departures: this.state.departures,
-	              noDepartures: this.state.noDepartures
-	            });
-	            console.log(this.state.departures);
-	          }).bind(this),
-	          error: (function (e) {
-	            console.log(e.message);
-	          }).bind(this)
-	        });
-	      }
+	      $.ajax({
+	        type: 'GET',
+	        url: url,
+	        async: false,
+	        // jsonpCallback: 'jsonCallback',
+	        contentType: "application/json",
+	        dataType: 'jsonp',
+	        success: (function (json) {
+	          //plot stops on map
+	          this.state.departures = json.arrivals;
+	          if (this.state.departures[0] == null) {
+	            this.state.noDepartures = 'No more departures';
+	          } else {
+	            this.state.noDepartures = '';
+	          }
+	          this.setState({
+	            departures: this.state.departures,
+	            noDepartures: this.state.noDepartures
+	          });
+	        }).bind(this),
+	        error: (function (e) {
+	          console.log(e.message);
+	        }).bind(this)
+	      });
 	    }
 	  }]);
 
@@ -23905,6 +23996,10 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
+	var _map = __webpack_require__(160);
+
+	var _map2 = _interopRequireDefault(_map);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23923,43 +24018,74 @@
 
 	    _this.state = {
 	      departureItem: ''
+
 	    };
+	    _this.listItemClick = _this.listItemClick.bind(_this);
+
 	    return _this;
 	  }
 
 	  _createClass(DepartureItem, [{
+	    key: 'listItemClick',
+	    value: function listItemClick() {
+
+	      this.props.onValueChange(this.props);
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var headerStyle = {
-	        color: 'rgb(92,193,146)'
+	        color: '#0D47A1',
+	        marginTop: "0px",
+	        fontSize: "16px"
 	      };
+	      var listItem = {
+	        background: '#fff',
+	        borderTop: "1px solid rgb(27,43,98)",
+	        marginBottom: "0px",
+	        padding: "12px"
+	      };
+	      var pStyle = {
+	        marginBottom: '0px'
+	      };
+	      var buttonStyle = {};
 
-	      var destination = typeof this.props.destination === 'undefined' ? 'No destinations' : 'Destination: ' + this.props.destination;
+	      var destination = typeof this.props.destination === 'undefined' ? 'No destinations' : this.props.destination;
 	      return _react2.default.createElement(
 	        'div',
-	        null,
+	        { style: listItem, onClick: this.listItemClick },
 	        _react2.default.createElement(
 	          'p',
 	          { style: headerStyle },
+	          _react2.default.createElement(
+	            'i',
+	            { className: 'material-icons' },
+	            'directions'
+	          ),
 	          destination
 	        ),
 	        _react2.default.createElement(
 	          'p',
-	          null,
+	          { style: pStyle },
 	          'Estimated arrival: ',
 	          this.props.due
 	        ),
 	        _react2.default.createElement(
 	          'p',
-	          null,
+	          { style: pStyle },
 	          'Departure time: ',
 	          this.props.departureTime
 	        ),
 	        _react2.default.createElement(
 	          'p',
-	          null,
+	          { style: pStyle },
 	          'Bus Number: ',
 	          this.props.number
+	        ),
+	        _react2.default.createElement(
+	          'button',
+	          { style: buttonStyle, className: 'mdl-button mdl-js-button mdl-button--primary mdl-js-ripple-effect' },
+	          'Show Route'
 	        )
 	      );
 	    }
