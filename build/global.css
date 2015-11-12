@@ -1,0 +1,74 @@
+.map{height:500px;}
+::-webkit-scrollbar {
+-webkit-appearance: none;
+width: 7px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+.material-icons{
+  float: left;
+}
+.loading{
+  position: fixed;
+  width: 90%;
+  height: 100%;
+  background: rgba(31, 31, 31, 0.58);
+  z-index: 1;
+  float: right;
+  left: 0;
+  display:none;
+}
+.loading h5{
+  position:absolute;
+  text-align: center;
+  top:34vh;
+  left:34vw;
+  color:#f8f8f8;
+  padding:8px;
+}
+.undefined{
+  height:36px;
+  margin-top:25px;
+  width:216px;
+}
+.left-panel{
+  width:22%;
+  height:100%;
+  float:right;
+}
+.google-map{
+  width:78%;
+  height: 100%;
+  float:left;
+  position:relative;
+}
+
+@media screen and (max-width: 480px) {
+  .left-panel{
+    width:100%;
+    height:100vh;
+    float:left;
+  }
+  .loading{
+    width:100%;
+  }
+  .google-map{
+    width:100%;
+    height:38vh;
+  }
+  .gmnoprint{
+  }
+  .mdl-button--accent{
+    display: none;
+  }
+  .undefined{
+    top:10px;
+    left:40px!important;
+    margin-top:0;
+    width:100%;
+    top:3px!important;
+  }
+}
