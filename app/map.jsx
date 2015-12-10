@@ -76,12 +76,14 @@ export default class Map extends React.Component {
     });
   }
   _searchButtonClick(){
+
     this.state.directions=null
     this.state.markers=[]
 
     this.state.markers.push({
        position: this.state.begin[0].geometry.location
      });
+     console.log(this.state.markers)
 
     $('.loading').show();
     this.setCoordinates();
@@ -90,12 +92,13 @@ export default class Map extends React.Component {
     this.state.directions=null
     this.state.markers=[]
     this.state.begin = this.refs.searchBox.getPlaces();
-    this.state.beginLng= this.state.begin[0].geometry.location.A
-    this.state.beginLat = this.state.begin[0].geometry.location.F
+    this.state.beginLng= this.state.begin[0].geometry.location.G
+    this.state.beginLat = this.state.begin[0].geometry.location.K
 
     this.state.markers.push({
        position: this.state.begin[0].geometry.location
      });
+
 
     $('.loading').show();
     this.setCoordinates();
