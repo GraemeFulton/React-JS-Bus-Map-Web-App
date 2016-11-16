@@ -92,8 +92,9 @@ export default class Map extends React.Component {
     this.state.directions=null
     this.state.markers=[]
     this.state.begin = this.refs.searchBox.getPlaces();
-    this.state.beginLng= this.state.begin[0].geometry.location.G
-    this.state.beginLat = this.state.begin[0].geometry.location.K
+    // console.log(this.refs.searchBox.getPlaces())
+    this.state.beginLng= this.state.begin[0].geometry.viewport.f.f
+    this.state.beginLat = this.state.begin[0].geometry.viewport.b.b
 
     this.state.markers.push({
        position: this.state.begin[0].geometry.location
@@ -107,11 +108,11 @@ export default class Map extends React.Component {
 
   setCoordinates(){
 
-          this.state.northEastLat = this.state.beginLng+0.01
-          this.state.northEastLong =this.state.beginLat+0.01
+          this.state.northEastLat = this.state.beginLng
+          this.state.northEastLong =this.state.beginLat
 
-          this.state.southWestLat = this.state.beginLng-0.01
-          this.state.southWestLong =this.state.beginLat-0.01
+          this.state.southWestLat = this.state.beginLng
+          this.state.southWestLong =this.state.beginLat
 
           this.state.origin = new google.maps.LatLng(this.state.beginLng, this.state.beginLat),
 
@@ -120,9 +121,9 @@ export default class Map extends React.Component {
   }
 
   getNearestBusStops(){
-
-    var url='http://digitaslbi-id-test.herokuapp.com/bus-stops?northEast='+ this.state.northEastLat +','+this.state.northEastLong+'&southWest='+this.state.southWestLat+','+this.state.southWestLong+''
-
+//var url='https://api.tfl.gov.uk/journey/journeyresults/51.501,-0.123/to/1000013?api_key=497266f97f0dee17bfef93afaeec9cbd&app_id=1facb384'
+  //  var url='http://digitaslbi-id-test.herokuapp.com/bus-stops?northEast='+ this.state.northEastLat +','+this.state.northEastLong+'&southWest='+this.state.southWestLat+','+this.state.southWestLong+''
+var url = 'http://transportapi.com/v3/uk/bus/stops/near.json?lat='+this.state.northEastLat+'&lon='+this.state.southWestLong+'&app_key=1957236d66e8c0d991f59955ed52544b&app_id=cf5c2bbe'
     $.ajax({
        type: 'GET',
         url: url,
@@ -130,23 +131,23 @@ export default class Map extends React.Component {
         contentType: "application/json",
         dataType: 'jsonp',
         success: function(json) {
+          console.log(json)
           //plot stops on map
-          for (var i = 0; i < json.markers.length; i++) {
-            var location = {lat:json.markers[i].lat, lng: json.markers[i].lng};
-
+          for (var i = 0; i < json.stops.length; i++) {
+            var location = {lat:json.stops[i].latitude, lng: json.stops[i].longitude};
             var marker = new google.maps.Marker({
                 position: location,
-                title:json.markers[i].name,
-                label:json.markers[i].name,
-                data:json.markers[i],
+                title:json.stops[i].name,
+                label:json.stops[i].name,
+                data:json.stops[i].atcocode,
                 icon:'./img/bus.png',
                 selected:false,
-                lat:json.markers[i].lat,
-                lng:json.markers[i].lng,
+                lat:json.stops[i].latitude,
+                lng:json.stops[i].longitude,
                 animation:2
               });
               this.state.markers.push(marker);
-
+              //console.log(marker)
               this.setState({
                 markers: this.state.markers
               });
@@ -288,8 +289,8 @@ componentDidUpdate(){
     top:"25px",
     background:"#2962FF"
   }
-
-  var name = (typeof this.state.station.name === 'undefined') ? 'No bus selected' : this.state.station.name;
+  console.log(this.state.station)
+  var name = (typeof this.state.station === 'undefined') ? 'No bus selected' : this.state.station;
     return (
 
       <div>

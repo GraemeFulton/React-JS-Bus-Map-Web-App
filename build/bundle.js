@@ -19816,8 +19816,9 @@
 	  }, {
 	    key: 'getNearestBusStops',
 	    value: function getNearestBusStops() {
-
-	      var url = 'http://digitaslbi-id-test.herokuapp.com/bus-stops?northEast=' + this.state.northEastLat + ',' + this.state.northEastLong + '&southWest=' + this.state.southWestLat + ',' + this.state.southWestLong + '';
+	      //var url='https://api.tfl.gov.uk/journey/journeyresults/51.501,-0.123/to/1000013?api_key=497266f97f0dee17bfef93afaeec9cbd&app_id=1facb384'
+	      //  var url='http://digitaslbi-id-test.herokuapp.com/bus-stops?northEast='+ this.state.northEastLat +','+this.state.northEastLong+'&southWest='+this.state.southWestLat+','+this.state.southWestLong+''
+	      var url = 'http://transportapi.com/v3/uk/bus/stops/near.json?lat=51.534121&lon=-0.006944&app_key=1957236d66e8c0d991f59955ed52544b&app_id=cf5c2bbe';
 
 	      $.ajax({
 	        type: 'GET',
@@ -19826,6 +19827,7 @@
 	        contentType: "application/json",
 	        dataType: 'jsonp',
 	        success: (function (json) {
+	          console.log(json);
 	          //plot stops on map
 	          for (var i = 0; i < json.markers.length; i++) {
 	            var location = { lat: json.markers[i].lat, lng: json.markers[i].lng };
@@ -19850,6 +19852,7 @@
 	        }).bind(this),
 	        error: (function (e) {
 	          console.log(e.message);
+	          alert('ba');
 	        }).bind(this)
 	      });
 	    }

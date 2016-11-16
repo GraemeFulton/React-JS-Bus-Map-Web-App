@@ -42,11 +42,11 @@ export default class DepartureBoard extends React.Component {
             <DepartureItem
               onValueChange={this.changeInput}
               key={index}
-              destination={departure.destination}
-              due={departure.estimatedWait}
+              destination={departure.direction}
+              due={departure.expected_departure_time}
               routeName= {departure.routeName}
-              departureTime={departure.scheduledTime}
-              number={departure.routeId}
+              departureTime={departure.expected_departure_time}
+              number={departure.line}
               />
          ))}
 
@@ -57,7 +57,8 @@ export default class DepartureBoard extends React.Component {
 
   getDepartures(){
 
-    var url='http://digitaslbi-id-test.herokuapp.com/bus-stops/'+this.props.station.id+'';
+var url = 'http://transportapi.com/v3/uk/bus/stop/'+this.props.station+'/live.json?app_id=cf5c2bbe&app_key=1957236d66e8c0d991f59955ed52544b&group=no&nextbuses=yes'
+  //  var url='http://digitaslbi-id-test.herokuapp.com/bus-stops/'+this.props.station.id+'';
 
     $.ajax({
        type: 'GET',
@@ -68,7 +69,7 @@ export default class DepartureBoard extends React.Component {
         dataType: 'jsonp',
         success: function(json) {
           //plot stops on map
-            this.state.departures=json.arrivals;
+            this.state.departures=json.departures.all;
             if (this.state.departures[0] == null) {
               this.state.noDepartures = 'No more departures'
             }

@@ -15,7 +15,6 @@ export default class DepartureItem extends React.Component {
   }
 
   listItemClick(){
-
     this.props.onValueChange(this.props)
   }
 
@@ -36,7 +35,6 @@ export default class DepartureItem extends React.Component {
     }
     var buttonStyle={
     }
-
     var destination = (typeof this.props.destination === 'undefined') ? 'No destinations' :this.props.destination;
     return (
         <div style={listItem} onClick={this.listItemClick}>
