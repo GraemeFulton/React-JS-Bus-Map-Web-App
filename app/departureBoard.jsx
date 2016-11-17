@@ -18,7 +18,7 @@ export default class DepartureBoard extends React.Component {
   }
 
   changeInput(destination){
-    this.props.onValueChange(this.props.station, destination)
+    this.props.onValueChange(this.props, destination)
 
   }
 

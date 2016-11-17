@@ -83,7 +83,6 @@ export default class Map extends React.Component {
     this.state.markers.push({
        position: this.state.begin[0].geometry.location
      });
-     console.log(this.state.markers)
 
     $('.loading').show();
     this.setCoordinates();
@@ -92,7 +91,7 @@ export default class Map extends React.Component {
     this.state.directions=null
     this.state.markers=[]
     this.state.begin = this.refs.searchBox.getPlaces();
-    // console.log(this.refs.searchBox.getPlaces())
+
     this.state.beginLng= this.state.begin[0].geometry.viewport.f.f
     this.state.beginLat = this.state.begin[0].geometry.viewport.b.b
 
@@ -131,7 +130,6 @@ var url = 'http://transportapi.com/v3/uk/bus/stops/near.json?lat='+this.state.no
         contentType: "application/json",
         dataType: 'jsonp',
         success: function(json) {
-          console.log(json)
           //plot stops on map
           for (var i = 0; i < json.stops.length; i++) {
             var location = {lat:json.stops[i].latitude, lng: json.stops[i].longitude};
@@ -147,7 +145,6 @@ var url = 'http://transportapi.com/v3/uk/bus/stops/near.json?lat='+this.state.no
                 animation:2
               });
               this.state.markers.push(marker);
-              //console.log(marker)
               this.setState({
                 markers: this.state.markers
               });
@@ -224,8 +221,8 @@ _onMarkerMouseOut(marker, index) {
 
 showTransitDirections(station, destination){
   this.setState({
-    begin:new google.maps.LatLng(station.lat, station.lng),
-    end:destination.destination+', London',
+    begin:station.origin,
+    end:destination.destination+' London',
     departureTime:destination.departureTime,
     showTransit:true
   });
@@ -289,7 +286,6 @@ componentDidUpdate(){
     top:"25px",
     background:"#2962FF"
   }
-  console.log(this.state.station)
   var name = (typeof this.state.station === 'undefined') ? 'No bus selected' : this.state.station;
     return (
 
@@ -338,7 +334,7 @@ componentDidUpdate(){
               <h4 style={headerStyle}> Departure Board</h4>
                 <p style={busHeader}><i style={busIcon} className="material-icons">directions_bus</i> {name}</p>
 
-              <DepartureBoard onValueChange={this.showTransitDirections} station={this.state.station} getDepartures={this.state.getDepartures}/>
+              <DepartureBoard onValueChange={this.showTransitDirections} station={this.state.station} origin={this.state.origin} getDepartures={this.state.getDepartures}/>
             </div>
 
           </div>
