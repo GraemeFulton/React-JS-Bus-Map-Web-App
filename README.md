@@ -1,5 +1,11 @@
 # Transport API Bus Departure Board (React.js + Google Maps)
-![transportapi](http://www.transportapi.com/wp-content/uploads/home_hero@2x.png)
+<img src="http://www.transportapi.com/wp-content/uploads/home_hero@2x.png" width="400">
+
+###[Run Live Demo](http://bus-mapper.herokuapp.com)
+
+*If the demo is not working, it has most likely hit the Transport API limits.*
+
+
 ##About
 * Built with React + Webpack + Babel, see here for [starter repo](https://github.com/GraemeFulton/react-webpack-babel-starter), and [this tutorial by SurviveJS](http://survivejs.com/webpack/developing-with-webpack/automatic-browser-refresh/), which I used to get started.
 * Uses [React Google Maps](https://github.com/tomchentw/react-google-maps) by [Tom Chen](https://github.com/tomchentw) for Google Map + React integration
