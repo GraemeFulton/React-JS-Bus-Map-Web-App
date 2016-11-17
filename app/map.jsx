@@ -42,7 +42,7 @@ export default class Map extends React.Component {
     };
 
     $('.loading').show();
-    this.setCoordinates();
+  //  this.setCoordinates();
 
   }
 
@@ -254,6 +254,7 @@ componentDidUpdate(){
    "outline": "none",
    "padding": "0 12px",
    "textOverflow": "ellipses",
+   "marginTop":"10px"
   }
   var headerStyle = {
     background:'#0D47A1',
@@ -282,14 +283,13 @@ componentDidUpdate(){
   }
   var searchStyle={
     zIndex:"9999",
-    left:"305px",
-    top:"25px",
-    background:"#2962FF"
+    left:"340px",
+    top:"10px",
+    background:"#2962FF",
+    "position":"absolute"
   }
   var name = (typeof this.state.station === 'undefined') ? 'No bus selected' : this.state.station;
     return (
-
-      <div>
 
           <div style={container}>
             <GoogleMap containerProps={{
@@ -310,7 +310,7 @@ componentDidUpdate(){
                        onPlacesChanged={this.sendContent}
                        types= '(cities)'
                        style={inputStyle} />
-                     <button style={searchStyle} className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this._searchButtonClick}><i className="material-icons">search</i></button>
+              <button style={searchStyle} className="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onClick={this._searchButtonClick}><i className="material-icons">search</i></button>
 
 
               {this.state.markers.map((marker, index) => (
@@ -338,7 +338,6 @@ componentDidUpdate(){
             </div>
 
           </div>
-      </div>
 
     );
 
