@@ -42,7 +42,7 @@ export default class Map extends React.Component {
     };
 
     $('.loading').show();
-  //  this.setCoordinates();
+    this.setCoordinates();
 
   }
 
@@ -178,6 +178,7 @@ var url = 'http://transportapi.com/v3/uk/bus/stops/near.json?lat='+this.state.no
     this.state.markers[index] = marker
     this.setState({
       directions:null,
+      activeMarkerName:marker.label,
       station: marker.data,
       markers:this.state.markers,
       getDepartures:true,
@@ -288,7 +289,7 @@ componentDidUpdate(){
     background:"#2962FF",
     "position":"absolute"
   }
-  var name = (typeof this.state.station === 'undefined') ? 'No bus selected' : this.state.station;
+  var name = (typeof this.state.station === 'undefined') ? 'No bus selected' : this.state.activeMarkerName;
     return (
 
           <div style={container}>
